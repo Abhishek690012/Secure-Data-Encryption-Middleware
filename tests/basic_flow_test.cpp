@@ -22,9 +22,7 @@ const char* g_ad_str = "unit-associated-data";
 const char* g_pt_str = "Test message for encryption";
 const char* g_ctx_str = "unit:test";
 
-// ============================================================================
 // Test Cases
-// ============================================================================
 
 void test_roundtrip() {
     std::cout << "[TEST] Encryption-Decryption roundtrip\n";
@@ -259,9 +257,7 @@ void test_empty_plaintext() {
     std::cout << "[PASS] Zero-length messages handled safely\n\n";
 }
 
-// ============================================================================
 // Main Test Runner
-// ============================================================================
 
 int main() {
     std::cout << "Running crypto middleware tests\n\n";

@@ -8,7 +8,6 @@ SecureBuffer::SecureBuffer(std::size_t size)
     : data_(nullptr), size_(size) {
     if (size_ > 0) {
         data_ = new unsigned char[size_];
-        // Initialize with zeros for safety
         util::zeroize(data_, size_);
     }
 }
@@ -16,7 +15,6 @@ SecureBuffer::SecureBuffer(std::size_t size)
     //destroyer
 SecureBuffer::~SecureBuffer() noexcept {
     if (data_) {
-        // Securely wipe memory before returning it to the heap
         util::zeroize(data_, size_);
         delete[] data_;//releasing heap memory 
         data_ = nullptr;
@@ -33,17 +31,16 @@ SecureBuffer::SecureBuffer(SecureBuffer&& other) noexcept
 
 SecureBuffer& SecureBuffer::operator=(SecureBuffer&& other) noexcept {
     if (this != &other) {
-        // 1. Wipe and release current resource
+
         if (data_) {
             util::zeroize(data_, size_);
             delete[] data_;
         }
 
-        // 2. Transfer from other
+
         data_ = other.data_;
         size_ = other.size_;
 
-        // 3. Invalidate other
         other.data_ = nullptr;
         other.size_ = 0;
     }

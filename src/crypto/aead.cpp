@@ -9,16 +9,13 @@ namespace crypto {
 
 namespace {
 
-// ============================================================================
 // Internal Primitives: ChaCha20 & Poly1305 (RFC 8439)
-// ============================================================================
 
 // ChaCha20 constants
 constexpr uint64_t kChaChaBlockSize = 64;
 // Limit to 2^32 - 1 blocks to prevent counter overflow
 constexpr uint64_t kMaxMessageLen = (static_cast<uint64_t>(1) << 32) * kChaChaBlockSize - kChaChaBlockSize;
 
-// --- Utilities ---
 
 inline uint32_t load32_le(const uint8_t* p) {
     return (uint32_t)p[0] | ((uint32_t)p[1] << 8) |
@@ -50,7 +47,6 @@ bool constant_time_equals(const uint8_t* a, const uint8_t* b, std::size_t len) {
     return result == 0;
 }
 
-// --- ChaCha20 ---
 
 struct ChaCha20State {
     uint32_t s[16];
@@ -129,7 +125,7 @@ struct ChaCha20State {
  * Uses 5 26-bit limbs for accumulator and key.
  * * Mathematical Definition:
  * accumulator = (accumulator + block + 2^128) * r % p
- * * Note: RFC 8439 requires that all inputs to Poly1305 be padded to 16 bytes
+ * *  RFC 8439 requires that all inputs to Poly1305 be padded to 16 bytes
  * with zeros. The implicit high bit (2^128) is handled by the process_block 
  * function internally.
  */
@@ -198,7 +194,6 @@ public:
             // RFC 8439: Last partial block is zero-padded to 16 bytes.
             std::memset(buffer + buffer_len, 0, 16 - buffer_len);
             
-            // We do NOT set buffer[buffer_len] = 1.
             // The process_block function intrinsically adds 2^128 (the high bit)
             // to every 16-byte block processed, which is the correct mathematical
             // definition for Poly1305.
@@ -300,9 +295,7 @@ private:
 
 } // namespace anonymous
 
-// ============================================================================
 // Public API Implementation
-// ============================================================================
 
 AeadResult Aead::encrypt(
     const util::SecureBuffer& key,
@@ -341,7 +334,6 @@ AeadResult Aead::encrypt(
     chacha.process_stream(plaintext, ciphertext, pt_len);
 
     // 4. Calculate Tag (RFC 8439)
-    // Mac(AD | pad | CT | pad | len(AD) | len(CT))
     
     // AD
     if (ad && ad_len > 0) {
@@ -392,14 +384,14 @@ AeadResult Aead::decrypt(
         return AeadResult::InvalidInput;
     }
 
-    // 1. Re-calculate Poly1305 Key (OTK)
+    //  Re-calculate Poly1305 Key (OTK)
     ChaCha20State chacha;
     chacha.init(static_cast<const uint8_t*>(key.data()), nonce, 0);
     
     uint8_t block0[64];
     chacha.block(block0);
     
-    // 2. Calculate expected Tag
+    // Calculate expected Tag
     Poly1305 poly(block0);
     util::zeroize(block0, sizeof(block0));
 
@@ -430,14 +422,14 @@ AeadResult Aead::decrypt(
     uint8_t expected_tag[16];
     poly.finish(expected_tag);
 
-    // 3. Verify Tag (Constant Time)
+
     if (!constant_time_equals(tag, expected_tag, TagSize)) {
         util::zeroize(expected_tag, sizeof(expected_tag));
         return AeadResult::AuthenticationFailed;
     }
     util::zeroize(expected_tag, sizeof(expected_tag));
 
-    // 4. Decrypt (Only after verification)
+    // Decrypt (Only after verification)
     chacha.init(static_cast<const uint8_t*>(key.data()), nonce, 1);
     chacha.process_stream(ciphertext, plaintext, ct_len);
 

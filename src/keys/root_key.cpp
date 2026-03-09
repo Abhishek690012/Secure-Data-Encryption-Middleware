@@ -6,7 +6,7 @@ namespace keys {
 RootKey::RootKey(const void* key_data, std::size_t key_len)
     : key_(key_len) {
     // Note: SecureBuffer constructor handles allocation and initial zeroing.
-    // If the buffer size is 0 or data is null, we essentially have an 
+    // If the buffer size is 0 or data is null, we  have an 
     // empty key, but the object itself remains in a consistent state.
     if (key_data && key_len > 0) {
         std::memcpy(key_.data(), key_data, key_len);

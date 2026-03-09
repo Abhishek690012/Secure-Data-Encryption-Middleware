@@ -21,9 +21,8 @@ int main() {
     std::cout << "Crypto Middleware Demo\n";
     std::cout << "===============================\n\n";
 
-    // ---------------------------------------------------------
-    // 1. Root Key & Service Initialization
-    // ---------------------------------------------------------
+
+    //  Root Key & Service Initialization
     std::cout << "[STEP] Initializing Root Key\n";
     
     uint8_t root_key_material[32] = {
@@ -38,17 +37,16 @@ int main() {
     
     std::cout << "[OK] Root key initialized\n\n";
 
-    // ---------------------------------------------------------
-    // 2. Context Creation
-    // ---------------------------------------------------------
+
+    //Context Creation
+
     std::cout << "[STEP] Creating encryption context\n";
     const char* ctx_string = "demo:file_encryption";
     context::Context ctx(ctx_string);
     std::cout << "[INFO] Context = " << ctx_string << "\n\n";
 
-    // ---------------------------------------------------------
-    // 3. Prepare Inputs
-    // ---------------------------------------------------------
+    // Prepare Inputs
+  
     std::cout << "[STEP] Preparing plaintext\n";
     
     const char* pt_str = "The quick brown fox jumps over the lazy dog";
@@ -66,14 +64,13 @@ int main() {
     std::size_t ad_len = std::strlen(ad_str);
     std::cout << "[INFO] Associated data attached\n\n";
 
-    // Stack-allocated buffers
+    // Stack-allocated buffer
     uint8_t ciphertext[256] = {0};
     uint8_t decrypted[256] = {0};
     uint8_t tag[16] = {0};
 
-    // ---------------------------------------------------------
-    // 4. Encryption
-    // ---------------------------------------------------------
+
+    // Encryption
     std::cout << "[STEP] Performing encryption\n";
 
     api::CryptoResult enc_result = service.encrypt(
@@ -95,10 +92,9 @@ int main() {
         return 1;
     }
 
-    // ---------------------------------------------------------
     // 5. Decryption
-    // ---------------------------------------------------------
-    std::cout << "[STEP] Attempting decryption\n";
+
+    std::cout << "[STEP] Attempt decryption\n";
 
     api::CryptoResult dec_result = service.decrypt(
         ctx,
@@ -119,16 +115,15 @@ int main() {
         return 1;
     }
 
-    // ---------------------------------------------------------
-    // 6. Tampering Test
-    // ---------------------------------------------------------
+
+    // Tampering Test
     std::cout << "[STEP] Tampering test\n";
     
     // Flip bits in the first byte of the ciphertext
     ciphertext[0] ^= 0xFF;
     std::cout << "[INFO] Ciphertext modified\n\n";
 
-    // Clear decrypted buffer to prove we aren't seeing old data
+    // Clear decrypted buffer to prove we are not seeing old data
     std::memset(decrypted, 0, sizeof(decrypted));
 
     api::CryptoResult tamper_result = service.decrypt(

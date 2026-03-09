@@ -121,8 +121,7 @@ struct Sha256 {
     }
 };
 
-// Streaming HMAC-SHA256 Wrapper
-// Reduces code duplication and ensures correct padding/inner/outer hash handling.
+// Reduceing code duplication and ensures correct padding/inner/outer hash handling.
 class HmacSha256 {
     Sha256 inner_;
     Sha256 outer_;
@@ -151,7 +150,7 @@ public:
         }
         // XOR remaining bytes of pads with 0 (which is identity for XOR) handled by memset
 
-        // 2. Start Inner Hash
+        // Start Inner Hash
         inner_.update(k_ipad, Sha256::BlockSize);
         
         util::zeroize(k_ipad, sizeof(k_ipad));
@@ -183,9 +182,7 @@ const uint8_t kDerivationSalt[] = "SecureMiddleware_HKDF_Salt_v1";
 
 } // namespace anonymous
 
-// ============================================================================
 // Public API Implementation
-// ============================================================================
 
 util::SecureBuffer KeyDerivation::derive(
     const RootKey& root,
@@ -195,7 +192,6 @@ util::SecureBuffer KeyDerivation::derive(
     util::SecureBuffer derived_key(out_len);
     if (out_len == 0) return derived_key;
 
-    // --- HKDF-Extract (RFC 5869) ---
     // PRK = HMAC-Hash(salt, IKM)
     uint8_t prk[Sha256::DigestSize]; 
     {
@@ -204,7 +200,7 @@ util::SecureBuffer KeyDerivation::derive(
         hmac.final(prk);
     }
 
-    // --- HKDF-Expand (RFC 5869) ---
+
     // T(0) = empty
     // T(n) = HMAC-Hash(PRK, T(n-1) | info | n)
     
@@ -222,7 +218,7 @@ util::SecureBuffer KeyDerivation::derive(
             hmac.update(t_block, Sha256::DigestSize);
         }
         
-        // Info (Context)
+        // Context
         if (ctx.data() && ctx.size() > 0) {
             hmac.update(static_cast<const uint8_t*>(ctx.data()), ctx.size());
         }
@@ -233,7 +229,6 @@ util::SecureBuffer KeyDerivation::derive(
         // Calculate T(n)
         hmac.final(t_block);
 
-        // Copy T(n) to output
         std::size_t to_copy = (out_len - copied < Sha256::DigestSize) 
                             ? (out_len - copied) 
                             : Sha256::DigestSize;

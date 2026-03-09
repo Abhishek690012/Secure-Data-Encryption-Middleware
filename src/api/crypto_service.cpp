@@ -27,8 +27,7 @@ CryptoService::CryptoService(const keys::RootKey& root)
 }
 
 CryptoService::~CryptoService() noexcept {
-    // Nothing to zeroize here; the root key is owned externally,
-    // and derived keys are handled by RAII within method scopes.
+    // Nothing to zeroize here; 
 }
 
 CryptoResult CryptoService::encrypt(
@@ -51,12 +50,12 @@ CryptoResult CryptoService::encrypt(
         return CryptoResult::InvalidInput;
     }
 
-    // 1. Derive the context-specific key.
+    //  Derive the context-specific key.
     // The resulting derived_key (util::SecureBuffer) owns the memory 
     // and is guaranteed to securely wipe it when it goes out of scope.
     util::SecureBuffer derived_key = keys::KeyDerivation::derive(root_key_, ctx, kDerivedKeySize);
 
-    // 2. Perform Authenticated Encryption.
+    //Perform Authenticated Encryption.
     crypto::AeadResult res = crypto::Aead::encrypt(
         derived_key,
         nonce, nonce_len,
@@ -66,7 +65,7 @@ CryptoResult CryptoService::encrypt(
         tag, tag_len
     );
 
-    // 3. Translate and return result.
+    //Translate and return result.
     return translate_aead_result(res);
 }
 
@@ -90,10 +89,10 @@ CryptoResult CryptoService::decrypt(
         return CryptoResult::InvalidInput;
     }
 
-    // 1. Derive the context-specific key matching the encryption step.
+    // Derive the context-specific key matching the encryption step.
     util::SecureBuffer derived_key = keys::KeyDerivation::derive(root_key_, ctx, kDerivedKeySize);
 
-    // 2. Perform Authenticated Decryption.
+    // Perform Authenticated Decryption.
     // The Aead layer handles Verify-Before-Decrypt and ensures plaintext 
     // is not written if the authentication tag is invalid.
     crypto::AeadResult res = crypto::Aead::decrypt(
@@ -105,7 +104,7 @@ CryptoResult CryptoService::decrypt(
         plaintext
     );
 
-    // 3. Translate and return result.
+    // Translate and return result.
     return translate_aead_result(res);
 }
 
