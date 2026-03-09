@@ -1,5 +1,7 @@
 # Secure Data Encryption Middleware
 
+This project implements a misuse-resistant cryptographic middleware that prevents common errors such as key reuse, missing authentication, and insecure memory handling.
+
 A modular **C++ cryptographic middleware** designed to provide a safe interface for authenticated encryption while preventing common cryptographic misuse.
 
 The project introduces a layered architecture separating:
