@@ -118,7 +118,6 @@ struct ChaCha20State {
     }
 };
 
-// --- Poly1305 ---
 
 /**
  * Standard 32-bit implementation of Poly1305.
